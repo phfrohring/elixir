@@ -1,0 +1,94 @@
+#! /usr/bin/env bash
+
+# This Source Code Form is subject to the terms of the Mozilla Public License,
+# v2.0. If a copy of the MPL was not distributed with this file, You can obtain one
+# at http://mozilla.org/MPL/2.0/.
+#
+# Copyright (c) 2018-2019 Contributors as noted in the AUTHORS file.
+
+
+cmd='source /home/phf/bash/lib/bash_utils.sh >/dev/null'
+eval "$cmd"
+if [[ "$?" -ne 0 ]]; then
+    echo "$BASH_SOURCE cmd failed. cmd: $cmd" >&2
+    exit 1
+fi
+
+
+ut::p::setup
+
+
+err() {
+    local msg="$msg"
+    ut::p::err "$BASH_SOURCE :: $msg"
+}
+__ERR=err
+
+
+documentation=$(cat <<'EOF'
+
+Description
+
+    self replicate except for the values set in this script.
+
+
+Appxxx
+
+    ./self_replicate a_package_name
+
+
+Input
+
+    $ ./self_replicate $a_package_name
+
+      where:
+
+        $a_package_name : is a package name
+
+
+Output
+
+    path of created package.
+
+
+Side effects
+
+    □
+EOF
+             )
+
+
+old_pkg_name="appxxx"
+new_pkg_name="$1"
+if ([[ -z "$new_pkg_name" ]] || [[ "$#" != 1 ]]); then
+    ut::p::err_exit "$documentation"
+fi
+
+
+OldPkgName=$(echo "$old_pkg_name" | sed -r 's/(^|_)(\w)/\U\2/g')
+NewPkgName=$(echo "$new_pkg_name" | sed -r 's/(^|_)(\w)/\U\2/g')
+
+
+model_path=$(dirname "$BASH_SOURCE")
+
+
+new_pkg_path="$model_path"/../"$new_pkg_name"
+ut::p::if_exists_err "$new_pkg_path"
+
+
+ut::p::eval 'cp -r "$model_path" "$new_pkg_path"' "line:$LINENO"
+
+
+cd "$new_pkg_path"
+
+
+ignored_directories='! -path "*git*" ! -path "*deps*" ! -path "*_build*" ! -path "*doc*"'
+ut::p::eval "find . -type f $ignored_directories -print0 | xargs -0 sed -i s/$old_pkg_name/$new_pkg_name/g" "line:$LINENO"
+ut::p::eval "find . -type f $ignored_directories -print0 | xargs -0 sed -i s/$OldPkgName/$NewPkgName/g" "line:$LINENO"
+
+
+mix deps.get
+mix docs
+
+
+echo "$new_pkg_path"

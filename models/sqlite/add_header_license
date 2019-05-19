@@ -1,0 +1,40 @@
+#! /usr/bin/env bash
+
+
+header_path="./license.header"
+if [[ ! -f "$header_path" ]]; then
+    echo "header_path missing. header_path: $header_path" >&2
+    exit 1
+fi
+
+
+find_files=$(cat <<'EOF'
+find . \
+     -type f \
+     \( -name "*.ex" -o -name "*.exs" -o -name "add_header_license" \) \
+     ! -name ".formatter.exs" \
+     ! -path "*git*" \
+     ! -path "*deps*" \
+     ! -path "*_build*" \
+     ! -path "*doc*"
+EOF
+          )
+
+
+for file_path in $(eval "$find_files"); do
+    if ! grep -q Copyright "$file_path"; then
+        cat license.header "$file_path" >"$file_path".new && mv "$file_path".new "$file_path"
+        echo "Added $header_path content to: $file_path"
+    fi
+done
+echo ""
+echo ""
+
+
+message=$(cat <<EOF
+All the files have a 'Copyright' word somewhere:
+
+$(eval "$find_files")
+EOF
+       )
+echo "$message"

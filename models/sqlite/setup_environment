@@ -1,0 +1,48 @@
+#! /usr/bin/env bash
+
+
+source ~/bash/lib/bash_utils.sh >/dev/null
+
+
+ut::p::setup
+
+
+documentation=$(cat <<EOF
+Description
+
+    Setup environment for this application.
+    Libraries, binaries ...
+
+
+Sqlite
+
+    setup_environment
+
+
+Input
+
+    □
+
+
+Output
+
+    □
+
+
+Side effects
+
+    □
+
+
+EOF
+)
+
+
+if [[ "$#" > 0 ]]; then
+    ut::p::err_exit "$documentation"
+fi
+
+
+env_spec_path="./environment.scm"
+ut::p::no_file_err "$env_spec_path"
+ut::gx::load_env "$env_spec_path"

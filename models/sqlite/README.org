@@ -1,0 +1,14 @@
+Wrap a ~sqlite~ database into a GenServer.
+
+#+begin_src sh
+  $ git clone git@github.com:phfrohring/elixir.git
+  $ cd ./elixir/models/sqlite
+  $ mix docs
+  $ open doc/index.html
+#+end_src
+
+
+[[file:LICENSE][License: MPLv2]]
+
+
+[[https://rfc.zeromq.org/spec:44/C4/][Contributing: Collective Code Construction Contract]]
